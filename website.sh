@@ -1,7 +1,7 @@
 #!/bin/bash
 
-min=10
-max=20
+run=5
+batch=10
 pause=2
 
 internet_wait ()
@@ -19,7 +19,7 @@ internet_wait ()
 wget_wait ()
 {
 	count=$( ps -A | grep -o wget | wc -l )
-	while [ $count -ge $min ]; do
+	while [ $count -ge $run ]; do
 		sleep $pause
 		count=$( ps -A | grep -o wget | wc -l )
 		#echo $count
@@ -54,8 +54,8 @@ do
 	time=$SECONDS
 	while read p; do
 		printf "$sites -> $p\n"
-        	wget https://$p -T 8 -t 1 -4 -qO /dev/null &
-		if [ $((sites % max)) -eq 0 ] ; then
+        wget https://$p -T 8 -t 1 -4 -qO /dev/null &
+		if [ $((sites % batch)) -eq 0 ] ; then
 			speed=$(( sites / ((SECONDS - time)+1)))
 			printf "$speed websites per second.\n"
 			internet_wait
