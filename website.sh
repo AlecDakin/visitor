@@ -56,7 +56,7 @@ do
 		printf "$sites -> $p\n"
         wget https://$p -T 8 -t 1 -4 -qO /dev/null &
 		if [ $((sites % max)) -eq 0 ] ; then
-			speed=$(( sites / (SECONDS - time)+1))
+			speed=$(( sites / ((SECONDS - time)+1)))
 			printf "$speed websites per second.\n"
 			internet_wait
 			wget_wait
