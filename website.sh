@@ -55,7 +55,7 @@ do
 	while read p; do
 		sites=$((sites+1))
 		printf "$sites -> $p\n"
-        wget -b -4 -T 8 -t 1 -qO /dev/null --https-only --no-check-certificate https://$p 
+        wget -b -4 -T 8 -t 1 -qO /dev/null --https-only --no-check-certificate https://$p > /dev/null
 		if [ $((sites % batch)) -eq 0 ] ; then
 			speed=$(( sites / ((SECONDS - time)+1)))
 			printf "$speed websites per second.\n"
