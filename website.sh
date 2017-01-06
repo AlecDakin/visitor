@@ -1,7 +1,8 @@
 #!/bin/bash
+## Notes to go here...
 
-min=10
-max=20
+run=5
+batch=10
 pause=2
 
 internet_wait ()
@@ -19,7 +20,7 @@ internet_wait ()
 wget_wait ()
 {
 	count=$( ps -A | grep -o wget | wc -l )
-	while [ $count -ge $min ]; do
+	while [ $count -ge $run ]; do
 		sleep $pause
 		count=$( ps -A | grep -o wget | wc -l )
 		#echo $count
@@ -50,18 +51,18 @@ do
 	rm /tmp/test1.txt
 	rm /tmp/test2.txt
 	
-	sites=1
+	sites=0
 	time=$SECONDS
+	uagent="Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; MATBJS; rv:11.0) like Gecko"
 	while read p; do
+		sites=$((sites+1))
 		printf "$sites -> $p\n"
-        	wget https://$p -T 8 -t 1 -4 -qO /dev/null &
-		if [ $((sites % max)) -eq 0 ] ; then
+        wget -U "$uagent" -4 -T 8 -t 1 -bq -O /dev/null --no-cookies --https-only https://$p > /dev/null
+		if [ $((sites % batch)) -eq 0 ] ; then
 			speed=$(( sites / ((SECONDS - time)+1)))
 			printf "$speed websites per second.\n"
 			internet_wait
 			wget_wait
-			
 		fi
-		sites=$((sites+1))
 	done < sites.txt
 done
