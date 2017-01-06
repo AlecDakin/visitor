@@ -50,18 +50,17 @@ do
 	rm /tmp/test1.txt
 	rm /tmp/test2.txt
 	
-	sites=1
+	sites=0
 	time=$SECONDS
 	while read p; do
+		sites=$((sites+1))
 		printf "$sites -> $p\n"
-        wget https://$p -T 8 -t 1 -4 -qO /dev/null &
+        	wget -b -4 -T 8 -t 1 -qO /dev/null --https-only --no-check-certificate https://$p 
 		if [ $((sites % batch)) -eq 0 ] ; then
 			speed=$(( sites / ((SECONDS - time)+1)))
 			printf "$speed websites per second.\n"
 			internet_wait
 			wget_wait
-			
 		fi
-		sites=$((sites+1))
 	done < sites.txt
 done
