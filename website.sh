@@ -1,5 +1,6 @@
 #!/bin/bash
 ## Notes to go here...
+
 run=5
 batch=10
 pause=2
