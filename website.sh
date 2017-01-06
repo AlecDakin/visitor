@@ -53,10 +53,11 @@ do
 	
 	sites=0
 	time=$SECONDS
+	$uagent="Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; MATBJS; rv:11.0) like Gecko"
 	while read p; do
 		sites=$((sites+1))
 		printf "$sites -> $p\n"
-        wget -b -4 -T 8 -t 1 -qO /dev/null --limit-rate=20k --https-only --no-check-certificate https://$p > /dev/null
+        wget -b -4 -T 8 -t 1 -qO /dev/null --limit-rate=20k --no-cookies --https-only --no-check-certificate -U $uagent https://$p > /dev/null
 		if [ $((sites % batch)) -eq 0 ] ; then
 			speed=$(( sites / ((SECONDS - time)+1)))
 			printf "$speed websites per second.\n"
