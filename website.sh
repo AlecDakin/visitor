@@ -9,8 +9,8 @@ internet_wait ()
 {
 	nc -z -w 1 -4 8.8.8.8 53 > /dev/null 2>&1
 	result=$?
-	echo "Offline"
 	while [ $result -ne 0 ]; do
+		echo "Offline"
 		count=$( ps -A | grep -o wget | wc -l )
 		if [ $count -ge 1 ]; then
 			pkill wget
