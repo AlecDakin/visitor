@@ -7,14 +7,14 @@ pause=2
 
 internet_wait ()
 {
-	PL=$(ping -c 5 -q  8.8.8.8 | grep -oP '\d+(?=% packet loss)')
+	PL=$(ping -c 1 -q  8.8.8.8 | grep -oP '\d+(?=% packet loss)')
 	while [ $PL == 100 ]; do
 		echo "Offline"
 		count=$( ps -A | grep -o wget | wc -l )
 		if [ $count -ge 1 ]; then
 			pkill wget
 		fi
-		sleep $pause
+		## sleep $pause
 		PL=$(ping -c 5 -q  8.8.8.8 | grep -oP '\d+(?=% packet loss)')
 	done
 }
