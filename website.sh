@@ -7,17 +7,15 @@ pause=2
 
 internet_wait ()
 {
-	nc -z -w 1 -4 8.8.8.8 53 > /dev/null 2>&1
-	result=$?
-	while [ $result -ne 0 ]; do
+	PL=$(ping -c 5 -q  8.8.8.8 | grep -oP '\d+(?=% packet loss)')
+	while [ $PL == 100 ]; do
 		echo "Offline"
 		count=$( ps -A | grep -o wget | wc -l )
 		if [ $count -ge 1 ]; then
 			pkill wget
 		fi
 		sleep $pause
-		nc -z -w 1 -4 8.8.8.8 53 > /dev/null 2>&1
-		result=$?
+		PL=$(ping -c 5 -q  8.8.8.8 | grep -oP '\d+(?=% packet loss)')
 	done
 }
 
@@ -61,7 +59,7 @@ do
 	while read p; do
 		sites=$((sites+1))
 		printf "$sites -> $p\n"
-        wget -U "$uagent" -4 -T 8 -t 1 -bq -O /dev/null --no-cookies --https-only https://$p > /dev/null
+        wget -U "$uagent" -T 8 -t 1 -4bq -O /dev/null --no-cookies --https-only "https://$p" > /dev/null
 		if [ $((sites % batch)) -eq 0 ] ; then
 			speed=$(( sites / ((SECONDS - time)+1)))
 			printf "$speed websites per second.\n"
