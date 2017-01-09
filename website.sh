@@ -12,7 +12,7 @@ internet_wait ()
 	echo "Offline"
 	while [ $result -ne 0 ]; do
 		count=$( ps -A | grep -o wget | wc -l )
-		if [ $count -ge 2 ]; then
+		if [ $count -ge 1 ]; then
 			pkill wget
 		fi
 		sleep $pause
