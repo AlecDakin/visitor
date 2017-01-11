@@ -20,8 +20,12 @@ internet_wait ()
 
 wget_wait ()
 {
+	[ -z $1 ] && local MIN=$RUN || local MIN=$1
 	local COUNT=$( ps -A | grep -o wget | wc -l )
-	while [ $COUNT -ge $RUN ]; do
+	local LOOP=0
+	while [ $COUNT -ge $MIN ]; do
+		((LOOP++))
+		[ $LOOP -gt 30 ] && pkill wget
 		sleep $PAUSE
 		COUNT=$( ps -A | grep -o wget | wc -l )
 	done
@@ -29,11 +33,7 @@ wget_wait ()
 
 get_agent ()
 {
-	if [ -s agents.txt ]; then
-		UAGENT="Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; MATBJS; rv:11.0) like Gecko"
-	else
-		UAGENT=$( shuf -n 1 agents.txt ) 
-	fi
+	[ -s agents.txt ] && UAGENT=$( shuf -n 1 agents.txt ) || UAGENT="Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; MATBJS; rv:11.0) like Gecko"
 }
 
 get_site ()
@@ -42,11 +42,7 @@ get_site ()
 	local ADDRESS=$1
 	local FILENAME="${ADDRESS##*/}"
 	
-	if [ -f $FILENAME ]; then
-		wget -U "$UAGENT" -N "$ADDRESS"
-	else
-		wget -U "$UAGENT" -S "$ADDRESS"
-	fi
+	[ -s $FILENAME ] && wget -U "$UAGENT" -4 --no-cookies -N "$ADDRESS" || wget -U "$UAGENT" -4 --no-cookies -S "$ADDRESS"
 }
 
 
@@ -62,8 +58,11 @@ do
 	get_site "https://s3.amazonaws.com/alexa-static/top-1m.csv.zip"
 	get_site "https://statvoo.com/dl/top-1million-sites.csv.zip"
 	
-	gzip -dc  top-1m.csv.zip | pv -s 22000000 | sed 's/[^,]*,//' > /tmp/test1.txt
-	gzip -dc  top-1million-sites.csv.zip | pv -s 22000000 | sed 's/[^,]*,//' > /tmp/test2.txt
+	## gzip -dc  top-1m.csv.zip | pv -s 22000000 | sed 's/[^,]*,//' > /tmp/test1.txt
+	## gzip -dc  top-1million-sites.csv.zip | pv -s 22000000 | sed 's/[^,]*,//' > /tmp/test2.txt
+	
+	gzip -dc  top-1m.csv.zip | grep -oP ',\K[^\n]*' > /tmp/test1.txt
+	gzip -dc  top-1million-sites.csv.zip | grep -oP ',\K[^\n]*' > /tmp/test2.txt
 
 	sort -fuR /tmp/test1.txt /tmp/test2.txt > sites.txt
 
@@ -85,4 +84,7 @@ do
 			wget_wait
 		fi
 	done < sites.txt
+	
+	wget_wait 1
+	
 done
