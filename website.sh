@@ -1,7 +1,7 @@
 #!/bin/bash
 ## Notes to go here...
 
-RUN=5
+RUN=5	
 BATCH=10
 PAUSE=2
 
@@ -21,6 +21,7 @@ internet_wait ()
 wget_wait ()
 {
 	[ -z $1 ] && local MIN=$RUN || local MIN=$1
+	[ $MIN -lt 1 ] && MIN=1
 	local COUNT=$( ps -A | grep -o wget | wc -l )
 	local LOOP=0
 	while [ $COUNT -ge $MIN ]; do
@@ -74,11 +75,11 @@ do
 	
 	while read LINE; do
 		((SITES++))
+		[ $((SITES % 10000)) -eq 0 ] && wget_wait 1
 		printf "$SITES -> $LINE\n"
         wget -U "$UAGENT" -T 8 -t 1 -4bq -O /dev/null --no-cookies --https-only "https://$LINE" > /dev/null
 		if [ $((SITES % BATCH)) -eq 0 ] ; then
-			SPEED=$(( SITES / ((SECONDS - TIME)+1)))
-			printf "$SPEED websites per second.\n"
+			[ $((SECONDS - TIME)) -ge 1 ] && printf "$(( SITES / (SECONDS - TIME))) websites per second.\n"
 			get_agent
 			internet_wait
 			wget_wait
